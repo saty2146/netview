@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+    <title>Subprocess result</title>
+  <body>
+    <h1>Subprocess Result</h1>
+    {{ subprocess_output }}
+  </body>
+   redirect(url_for('foo'))
+{% endblock %}

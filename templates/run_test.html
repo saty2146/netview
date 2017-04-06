@@ -1,0 +1,18 @@
+<html>
+  <head>
+  <link href="/static/css/loader.css" rel="stylesheet">
+  <script type="text/javascript">// <![CDATA[
+        function preloader(){
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("content").style.display = "block";
+  }//preloader
+        window.onload = preloader;
+        // ]]></script>
+    <title>Subprocess result</title>
+  </head>
+  <body>
+    <h1>Subprocess Result</h1>
+    <div id="loading"></div>
+    <div id="content">{{ subprocess_output }}</div>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>VLANs</h2>
+  <form class="form-search" action="" method="post" name="post">
+    {{ form.hidden_tag() }}
+      {{ form.post(size=30, maxlength=140) }}
+      {% for error in form.post.errors %}
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Search</button>
+  </form>
+    {{ table|safe }}
+{% endblock %}

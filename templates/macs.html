@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>MACs</h2>
+    <form class="form-search form-inline" action="" method="post">
+      {{ form.hidden_tag() }}
+      {{ form.file_option }}
+      {{ form.find_item(size=30, length=200, placeholder="Search text") }}
+      <button type="submit" class="btn btn-primary">Search</button>
+    {% for host in hosts %}
+    <a class="btn pull-right" align="left" href="{{ url_for('show_mac', host=host) }}">{{host}}</a>
+    {% endfor %}
+
+     </form>
+       {% for error in form.find_item.errors %}
+       {% endfor %}
+       {% if form.errors %}
+           {{ form.errors }}
+           {% endif %}
+    {{ table|safe }}
+</div>
+{% endblock %}

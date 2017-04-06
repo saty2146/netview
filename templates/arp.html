@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>ARPs</h2>
+
+    <form class="form-search form-inline" action="" method="post">
+      {{ form.hidden_tag() }}
+      {{ form.file_option }}
+      {{ form.find_item(size=30, length=200, placeholder="Search text") }}
+      <button type="submit" class="btn btn-primary">Search</button>
+    {% for host in hosts %}
+    <a class="btn pull-right" align="left" href="{{ url_for('show_arp', host=host) }}">{{host}}</a>
+    {% endfor %}
+
+       {% for error in form.find_item.errors %}
+       {% endfor %}
+       {% if form.errors %}
+           {{ form.errors }}
+           {% endif %}
+     </form>
+    {{ table|safe }}
+</div>
+{% endblock %}

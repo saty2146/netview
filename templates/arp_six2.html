@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div class=page>
+  <h1>ARP table</h1><div>
+  <a href="/arp_six1">six1</a>
+  <a href="/arp_six2">six2</a>
+  <a href="/arp_sit1">sit1</a></div>
+
+    {{ table|safe }}
+</div>
+{% endblock %}
