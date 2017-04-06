@@ -11,7 +11,7 @@ and write its to files for futher processing
 """
 
 import os
-from myfiles.devices import devices
+from devices import devices
 from netmiko import ConnectHandler
 
 def main():
