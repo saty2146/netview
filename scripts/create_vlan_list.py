@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*- 
 """
 Get vlan_list and mac_table downloaded by get_vlan_info.py and create DataFrame
 vlan information through all devices in one table
@@ -15,6 +16,8 @@ date_time = strftime("%d-%m-%Y_%H:%M:%S", localtime())
 
 
 pd.set_option('display.max_columns', None)
+
+filepath = '/home/tibor/Dropbox/tibi/python/netview/scripts/files/'
 
 def check_arg(args=None):
 
@@ -43,7 +46,7 @@ def check_arg(args=None):
 
 def join_vlans(hosts):
 
-    vlans = {}
+    vlans = {host:{} for host in hosts}
     vlan_regex = re.compile(r'^\d{1,4}')
     
     for host in devices:
@@ -54,7 +57,7 @@ def join_vlans(hosts):
                 line_list = filter(None, line_list)
                 mo_vlan = re.search(vlan_regex, line_list[0])
                 if mo_vlan:
-                    vlans.setdefault(int(mo_vlan.group()), line_list[1])
+                    vlans[host].setdefault(int(mo_vlan.group()), line_list[1])
     return vlans
 
 def dict_to_df(d):
@@ -65,6 +68,11 @@ def dict_to_df(d):
     return df
 
 def vlan_macs(hosts, vlans):
+    
+    uniq_vlans = {}
+    for key, value in vlans.iteritems():
+        for key2, value2 in value.iteritems():
+            uniq_vlans.setdefault(key2,value2)
 
     column_static = []
     column_dynamic = []
@@ -75,14 +83,22 @@ def vlan_macs(hosts, vlans):
     for host in hosts:
         column_dynamic.append(host + 'd')
 
-    index_vlans = vlans.keys()
+    index_vlans = uniq_vlans.keys()
     columns = column_static + column_dynamic
-    df1 = dict_to_df(vlans)
+    df1 = dict_to_df(uniq_vlans)
     
 
-    df2 = pd.DataFrame(index=vlans, columns=columns)
-    df2 = df2.fillna(0)
+    df2 = pd.DataFrame(index=uniq_vlans, columns=columns)
+    df2 = df2.fillna(-1)
     df  = pd.concat([df1, df2], axis=1)
+    #print(df.to_string())
+    
+    for key, value in vlans.iteritems():
+        for key2, value2 in value.iteritems():
+            #print key2, key
+            df.ix[key2, key] = 0
+            df.ix[key2, key + 'd'] = 0
+    #print(df.to_string())
 
     for host in hosts: 
         print ('Processing mac-address-table for %s' % host)
@@ -109,7 +125,7 @@ def vlan_macs(hosts, vlans):
                         line_list = filter(lambda name: name[:] != "R", line_list)
                         
                         if 'N/A' not in line and '---' not in line:
-                            print line_list, host
+                            #print line_list, host
                             vlan  = int(line_list[0])
                             type_entry = str(line_list[2])
 
@@ -161,13 +177,21 @@ def main():
     else:
         pass
 
-    df.replace({0: '-'}, regex=True, inplace=True)
-    for svi in name_static[1:]:
-        df.loc[df[svi] != '-', svi] = 'SVI'
+    for vlan_id in name_static[1:]:
+        df.loc[df[vlan_id] > 0 , vlan_id] = 'IF'
+        df.loc[df[vlan_id] == 0, vlan_id] = '°'
+    #    df.loc[df[vlan_id] == 0, vlan_id] = '-'
+    #for vlan_id in name_dynamic[1:]:
+    #    #df.loc[df[vlan_id] == 0, vlan_id] = 'SVI'
+        #df.loc[df[vlan_id] == -1 , vlan_id] = '-'
+
+    #df.replace({0: '-'}, regex=True, inplace=True)
+    df.replace({-1: '-'}, regex=True, inplace=True)
+    #df.replace({0: 'x'}, regex=True, inplace=True)
 
 #        df[svi].replace(1, 'SVI', inplace=True)
     filename = 'vlan_' + date_time + '.csv'
-    os.chdir('../files')
+    os.chdir(filepath)
     df.to_csv(filename)
     print(df.to_string())
 

@@ -14,6 +14,8 @@ from myfiles.devices import devices
 from time import gmtime, strftime, localtime
 date_time = strftime("%d-%m-%Y_%H:%M:%S", localtime())
 
+filepath = '/home/tibor/Dropbox/tibi/python/netview/scripts/files/'
+
 def df_arp_table():
 
     columns = ['host', 'ip', 'age', 'mac', 'iface','date']
@@ -55,7 +57,7 @@ def main():
     df = df.set_index('host')
     #df.sort_index(inplace=True)
     filename = 'arp_' + date_time + '.csv'
-    os.chdir('../files')
+    os.chdir(filepath)
     df.to_csv(filename)
     #print(df.to_string())
 

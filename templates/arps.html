@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h2>ARPs</h2>
+
+<div class="media">
+    <h3 class="media-heading pull-left">ARPs</h3>
+    <h5 class="media-heading pull-right">Last update: {{update}}</h5>
+</div>
+
     <form class="form-search form-inline" action="" method="post">
       {{ form.hidden_tag() }}
       {{ form.file_option }}

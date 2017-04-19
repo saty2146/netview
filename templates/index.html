@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
 
-  <h2>Vnet Network View</h2>
-  <h3>Last update:</h3>
-  <p>{{update}}</p>
+<div class="media">
+  <h3 class="media-heading pull-left">Vnet Network View</h3>
+  <h5 class="media-heading pull-right">Last update: {{update}}</h5>
+</div>
+  <p>VLANs: {{num_of_vlans}}</p>
+  <p>ARPs: {{num_of_arps}}</p>
+  <p>MACs: {{num_of_macs}}</p>
 
 {% endblock %}
