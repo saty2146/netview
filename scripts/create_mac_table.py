@@ -14,7 +14,7 @@ from myfiles.devices import devices
 from time import gmtime, strftime, localtime
 date_time = strftime("%d-%m-%Y_%H:%M:%S", localtime())
 
-filepath = '/home/tibor/Dropbox/tibi/python/netview/scripts/files/'
+filepath = '/home/tibor/Dropbox/tibi/python/netview/files/'
 
 def df_mac_table():
 

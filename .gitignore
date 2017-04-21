@@ -92,8 +92,9 @@ ENV/
 #saty added
 scripts/myfiles/*
 scripts/rawfiles/*
-scripts/files/*
+files/*
 flask/
+pygal
 *.csv
 *.txt
 backup/

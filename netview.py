@@ -7,12 +7,13 @@ from datetime import datetime
 import pandas as pd
 import numpy as np
 import re, glob, os, subprocess, time
-import csv
+import csv, pygal
 
-ip_whitelist = ['81.89.63.129', '81.89.63.131', '127.0.0.1']
+ip_whitelist = ['81.89.63.129', '81.89.63.130', '81.89.63.131', '81.89.63.132', '81.89.63.133', '81.89.63.134', '81.89.63.135', '81.89.63.136', '81.89.63.137', '81.89.63.138', '81.89.63.139', '81.89.63.140', '81.89.63.141', '81.89.63.142', '81.89.63.143', '81.89.63.144', '81.89.63.145', '81.89.63.146', '81.89.63.147', '81.89.63.148', '81.89.63.149', '81.89.63.150', '127.0.0.1']
 
 app = Flask(__name__)
 app.config.from_object('config')
+filespath = os.path.realpath('files')
 
 def valid_ip(): 
     client = request.remote_addr 
@@ -29,7 +30,7 @@ def get_data():
     return out
 
 def last_update():
-    newest = max(glob.glob('./scripts/files/*.csv'), key=os.path.getmtime)
+    newest = max(glob.glob(os.path.join(filespath,'*.csv')), key=os.path.getmtime)
     result = str(time.ctime(os.path.getmtime(newest)))
     return result
 
@@ -46,7 +47,7 @@ def run():
 def show_mac():
     update = last_update()
     form = MacForm()
-    files = glob.glob('./scripts/files/mac*.csv')
+    files = glob.glob(os.path.join(filespath,'mac*.csv'))
     files.sort(key=os.path.getmtime, reverse = True)
     filename = [os.path.basename(i) for i in (files)]
     ids = [i for i in range(len(filename))]
@@ -56,10 +57,10 @@ def show_mac():
         find_item = form.find_item.data.strip()
         file_id = form.file_option.data
         selected_file = [f[1] for f in form.file_option.choices if f[0] == file_id]
-        data = pd.read_csv('./scripts/files/' + selected_file[0], dtype={'vlan': str})
+        data = pd.read_csv(os.path.join(filespath, selected_file[0]), dtype={'vlan': str})
     else:
         find_item = None
-        newest = max(glob.glob('./scripts/files/mac*.csv'), key=os.path.getmtime)
+        newest = max(glob.glob(os.path.join(filespath,'mac*.csv')), key=os.path.getmtime)
     
         data = pd.read_csv(newest, dtype={'vlan': str})
 
@@ -86,7 +87,7 @@ def show_vlans():
     else:
         post = None
 
-    newest = max(glob.glob('./scripts/files/vlan*.csv'), key=os.path.getmtime)
+    newest = max(glob.glob(os.path.join(filespath,'vlan*.csv')), key=os.path.getmtime)
     data = pd.read_csv(newest, dtype={'vlan': str})
     data.info()
 
@@ -103,7 +104,7 @@ def show_vlans():
 def show_arp():
     update = last_update()
     form = ArpForm()
-    files = glob.glob('./scripts/files/arp*.csv')
+    files = glob.glob(os.path.join(filespath,'arp*.csv'))
     files.sort(key=os.path.getmtime, reverse = True)
     filename = [os.path.basename(i) for i in (files)]
     ids = [i for i in range(len(filename))]
@@ -115,10 +116,10 @@ def show_arp():
         print find_item, file_id
         selected_file = [f[1] for f in form.file_option.choices if f[0] == file_id]
         print selected_file
-        data = pd.read_csv('./scripts/files/' + selected_file[0])
+        data = pd.read_csv(os.path.join(filespath, selected_file[0]))
     else:
         find_item = None
-        newest = max(glob.glob('./scripts/files/arp*.csv'), key=os.path.getmtime)
+        newest = max(glob.glob(os.path.join(filespath, 'arp*.csv')), key=os.path.getmtime)
         data = pd.read_csv(newest)
 
     arphost = request.args.get('host', default = 'six1')
@@ -140,17 +141,30 @@ def show_arp():
 @app.route('/index', methods=['GET', 'POST'])
 def show_index():
 
-    newest_vlan = max(glob.glob('./scripts/files/vlan*.csv'), key=os.path.getmtime)
-    newest_arp = max(glob.glob('./scripts/files/arp*.csv'), key=os.path.getmtime)
-    newest_mac = max(glob.glob('./scripts/files/mac*.csv'), key=os.path.getmtime)
+    newest_vlan = max(glob.glob(os.path.join(filespath, 'vlan*.csv')), key=os.path.getmtime)
+    newest_arp = max(glob.glob(os.path.join(filespath, 'arp*.csv')), key=os.path.getmtime)
+    newest_mac = max(glob.glob(os.path.join(filespath, 'mac*.csv')), key=os.path.getmtime)
 
     update = last_update()
     num_of_vlans = num_of_rows(newest_vlan)
     num_of_arps = num_of_rows(newest_arp)
     num_of_macs = num_of_rows(newest_mac)
 
+    files = glob.glob(os.path.join(filespath, 'vlan*.csv'))
+    files.sort(key=lambda x: os.path.getmtime(x))
+    every_ten_file = files[::15] + files[-1:]
+    
+    line_chart = pygal.Line(x_label_rotation = 20, show_x_labels=False)
+    line_chart.title = "Vlan usage evolution"
+    chart_values = [num_of_rows(x) for x in every_ten_file]
+
+    date_values = [time.ctime(os.path.getmtime(x)) for x in every_ten_file]
+    line_chart.x_labels = map(str, date_values)
+    line_chart.add('Vlans', chart_values)
+    chart = line_chart.render_data_uri()
+
     if valid_ip():
-        return render_template('index.html', title = 'Home', update = update, num_of_vlans = num_of_vlans, num_of_arps = num_of_arps, num_of_macs = num_of_macs)
+        return render_template('index.html', title = 'Home', update = update, num_of_vlans = num_of_vlans, num_of_arps = num_of_arps, num_of_macs = num_of_macs, chart=chart)
     else:
         return render_template('404.html', title = 'Not Found')
 

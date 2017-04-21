@@ -17,7 +17,7 @@ date_time = strftime("%d-%m-%Y_%H:%M:%S", localtime())
 
 pd.set_option('display.max_columns', None)
 
-filepath = '/home/tibor/Dropbox/tibi/python/netview/scripts/files/'
+filepath = '/home/tibor/Dropbox/tibi/python/netview/files/'
 
 def check_arg(args=None):
 
