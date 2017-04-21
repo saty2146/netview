@@ -1,4 +1,5 @@
 #!flask/bin/python 
+# -*- coding: utf-8 -*- 
 
 from flask import *
 from forms import VlanForm, ArpForm, UpdateForm, MacForm
@@ -83,13 +84,32 @@ def show_vlans():
     form = VlanForm()
     if form.validate_on_submit():
         post = form.post.data.strip()
+        unused_vlans = False
 
     else:
         post = None
 
+    unused_vlans = request.args.get('unused_vlans', default = False)
+    l2_circuit = request.args.get('l2_circuit', default = False)
     newest = max(glob.glob(os.path.join(filespath,'vlan*.csv')), key=os.path.getmtime)
     data = pd.read_csv(newest, dtype={'vlan': str})
     data.info()
+
+    print unused_vlans
+    unused_list = ['0','-']
+    l2_circuit_list = ['°','-']
+    if unused_vlans:
+        data = data[data.six1d.isin(unused_list) & data.six2d.isin(unused_list)
+                & data.sit1d.isin(unused_list) & data.sit2d.isin(unused_list) &
+                data.shc31d.isin(unused_list) & data.shc32d.isin(unused_list) &
+                data.n31d.isin(unused_list) & data.n32d.isin(unused_list) &
+                data.n41d.isin(unused_list) & data.n42d.isin(unused_list)]
+    elif l2_circuit:
+        data = data[data.six1.isin(l2_circuit_list) & data.six2.isin(l2_circuit_list)
+                & data.sit1.isin(l2_circuit_list) & data.sit2.isin(l2_circuit_list) &
+                data.shc31.isin(unused_list) & data.shc32.isin(unused_list) &
+                data.n31.isin(l2_circuit_list) & data.n32.isin(l2_circuit_list) &
+                data.n41.isin(l2_circuit_list) & data.n42.isin(l2_circuit_list)]
 
     if post:
         columns = ['vlan', 'name', 'six1', 'six2', 'sit1', 'sit2', 'shc31', 'shc32', 'n31', 'n32', 'n41', 'n42']
@@ -97,8 +117,7 @@ def show_vlans():
         data = data.loc[mask.any(axis=1)]
     else:
         pass
-    return render_template('vlans.html',table=data.to_html(index=False,
-        classes='table table-hover'), title = 'Vlans', form=form, post = post, update = update)
+    return render_template('vlans.html',table=data.to_html(index=False, classes='table table-hover'), title = 'Vlans', form=form, post = post, update = update, unused = 'unused', circuit = 'circuit')
 
 @app.route("/arps", methods=['GET', 'POST'])
 def show_arp():
